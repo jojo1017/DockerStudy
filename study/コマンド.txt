@@ -1,0 +1,4 @@
+docker-compose -f docker-compose.runcher-sverver.yml up -d
+
+docker-compose -f docker-compose.rocket.chat.yml up -d
+

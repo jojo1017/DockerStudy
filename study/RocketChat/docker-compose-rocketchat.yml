@@ -1,0 +1,33 @@
+version: '2'
+services:
+  rocketchat:
+    image: rocketchat/rocket.chat:latest
+     # 環境変数を設定
+    environment:
+    # RocketChatのURL（ここではホスト名をlocalhostとしています）
+    - ROOT_URL=http://localhost
+    # アカウントのメールアドレスのドメインチェックを無効化
+    - Accounts_UseDNSDomainCheck=false
+    restart: unless-stopped
+    volumes:
+      - ./uploads:/app/uploads
+
+    depends_on:
+      - mongo
+    ports:
+      - 3000:3000
+
+  mongo:
+    image: mongo:latest
+    restart: unless-stopped
+    volumes:
+     - ./data/db:/data/db
+     - ./data/dump:/dump
+
+    command: mongod --smallfiles --oplogSize 128 --replSet rs0
+
+  mongo-init-replica:
+    image: mongo:latest
+    command: 'mongo mongo/rocketchat --eval "rs.initiate({ _id: ''rs0'', members: [ { _id: 0, host: ''localhost:27017'' } ]})"'
+    depends_on:
+      - mongo
